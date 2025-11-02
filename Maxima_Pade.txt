@@ -1,0 +1,79 @@
+/*
+ Zero/Residue calculus for Pade approximation.
+ Used in time domain response of Laplace transfer function.
+
+ Computer methods for Circuit Analysis
+ Chapter 10 Numerical Laplace Transform Inversion
+ J.Vlach,K.Singhal 1983
+    
+ "Real time functions can be evaluated using only the poles zi in the upper half plane.
+  This reduces the computations to one-half.
+  M'=M/2 and Ki'=2*Ki"
+  (M = order of denominator, N=order of numerator)
+  Select N=M-2
+
+  Heiko Schroeter, University of Bremen 2025
+*/
+
+kill(all);
+/* Select M (order of Denominator) and N=M-2 (order of Numerator) */
+M: 6$
+N: M-2$
+
+/* Taylor series of %e^z for z=0 to z=M+N */
+taylor_truncate_polynomials: true$
+taylor(%e^z,z,0, M+N)$
+
+/* calculate Pade polynomial R(N,M)(z)=P(N)(z)/Q(M)(z),N,M */
+p: pade(%,N,M)$
+
+/* save numerator and demoninator of Pade polynomial */
+numerator(z)  := num(p[1])$
+denominator(z):= denom(p[1])$
+
+/* get all roots, also complex */
+polyfactor: false$
+
+/* sort roots to seperate conjugate pairs */
+allZerosNumerator: sort(bfallroots(%i*denominator(z)), 'ordergreatp)$
+
+/* Keep only one root of conjugate pairs */
+Zi: reverse(makelist(allZerosNumerator[i],i,1,
+                       floor(length(allZerosNumerator)/2)))$
+
+/* Denominator differential */
+ablNenner(z):= diff(denominator(z),z,1)$
+
+/* calculate new polynomial */
+poly(z):= numerator(z)/ablNenner(z)$
+
+/* insert pole zi into numerator(zi)/diff(denominator(zi)) */
+/* Multiply by 2 see section 10.2 Singhal,Vlach Computer Analysis */
+KiRaw: map (lambda ([solution1],
+                    subst (solution1, poly(z))),
+             Zi), expand$
+
+/* Ki*2 see Vlach,Singhal */
+Ki: KiRaw*2$
+
+/* get Zi values */
+ttt(z):= z$ /* helper func to just return z value */
+/* get rhs of Zi */
+rhsZi: map (lambda([value],subst(value,ttt(z))), Zi), expand$
+
+/* Output zeros and residues, syntax here for Scilab (a little bit) */
+printf(true,"M: ~3d  N: ~3d~%~%", M, N)$
+printf(true,"Zi:~%Z=[")$
+map (lambda ([value],
+        printf(true,"complex(~3,16f,~3,16f),~%",
+                        realpart(rectform(value)),
+                        imagpart(rectform(value))))
+    ,rhsZi)$
+printf(true,"];~%")$
+printf(true,"KP=[ ")$
+map (lambda ([value],
+        printf(true,"complex(~3,16f,~3,16f),~%",
+                        realpart(rectform(value)),
+                        imagpart(rectform(value))))
+    ,Ki)$
+printf(true,"];")$
