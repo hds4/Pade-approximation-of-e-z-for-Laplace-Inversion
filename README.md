@@ -1,4 +1,4 @@
-# Pade-approximation-of-e-z-for-Laplace-Inversion
+# Pade approximation of e^z for Laplace Inversion
 Calculate the Zeros and Residues of the Pade approximation of e^z.
 See Vlach,Singhal Computer methods for Circuit Analysis  Chapter 10 Numerical Laplace Transform Inversion
 
