@@ -6,3 +6,5 @@ Calute the Zeros and Residues of the Pade approximation of e^z. See Vlach,Singha
   M'=M/2 and Ki'=2*Ki"
   (M = order of denominator, N=order of numerator)
   Select N=M-2
+
+Script for Maxima Algebra System.
